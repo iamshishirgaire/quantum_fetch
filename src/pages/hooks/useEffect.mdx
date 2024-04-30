@@ -1,0 +1,92 @@
+The Context API in React is a way to manage state at the application level and share data between components without having to pass props through each level of the component tree. It provides a way to pass data through the component tree without having to pass props down manually at every level.
+
+The Context API consists of two main parts:
+
+1. **`createContext` function**: This function creates a context object, which has a `Provider` component and a `Consumer` component. The `Provider` is used to wrap the components that need access to the context, and the `Consumer` is used to access the values from the context.
+    
+2. **`Provider` and `Consumer` components**: The `Provider` component is used to wrap the part of the component tree where you want to make the context available. It takes a `value` prop, which is the data you want to share. The `Consumer` component is used to access the value from the context within a ==class== component.
+
+3. **`useContext()`** hook can be used in react functional component to access the value set during context creation by destructuring it.
+    
+
+Here's an example of using the Context API in React:
+
+```jsx
+import React, { createContext, useContext, useState } from 'react';
+// Step 1: Create a context
+const MyContext = createContext();
+// Step 2: Create a provider component
+const MyProvider = ({ children }) => {
+  const [myData, setMyData] = useState('Default Data');
+
+  return (
+    <MyContext.Provider value={{ myData, setMyData }}>
+      {children}
+    </MyContext.Provider>
+  );
+};
+// Step 3: Create a component that consumes the context
+const MyComponent = () => {
+  const { myData, setMyData } = useContext(MyContext);
+
+  return (
+    <div>
+      <p>Data from context: {myData}</p>
+      <button onClick={() => setMyData('New Data')}>Change Data</button>
+    </div>
+  );
+};
+// Step 4: Use the context provider in your app
+const App = () => {
+  return (
+    <MyProvider>
+      <div>
+        <h1>My App</h1>
+        <MyComponent />
+      </div>
+    </MyProvider>
+  );
+};
+
+export default App;
+```
+
+In this example:
+
+- `MyContext` is created using `createContext`.
+- `MyProvider` is a component that uses the `MyContext.Provider` to wrap its children. It provides the context value, which includes `myData` and a function `setMyData` to update the context.
+- `MyComponent` uses `useContext` to access the context values (`myData` and `setMyData`).
+- The `App` component is wrapped with the `MyProvider` component, making the context available to `MyComponent` and its descendants.
+
+Now, any component within the `MyProvider` can access and update the shared state without having to pass props through each level manually.
+
+Instead of manually accessing the context and changing the state we can create a custom hook to use and set the value inside the context as below : 
+```jsx
+import { useContext } from "react";
+import { useState } from "react";
+import { createContext } from "react";
+
+const ThemeContext = createContext();
+const ToggleThemeContext = createContext();
+export function useTheme() {
+return useContext(ThemeContext);
+}
+export function useThemeToggle() {
+return useContext(ToggleThemeContext);
+}
+
+const ThemeProvider = ({ children }) => {
+const [darkTheme, setDarkTheme] = useState(false);
+function toggleTheme() {
+setDarkTheme(!darkTheme);
+}
+return (
+<ThemeContext.Provider value={{ darkTheme }}>
+<ToggleThemeContext.Provider value={{ toggleTheme }}>
+{children}
+</ToggleThemeContext.Provider>
+</ThemeContext.Provider>
+);
+};
+export { ThemeProvider };
+```
